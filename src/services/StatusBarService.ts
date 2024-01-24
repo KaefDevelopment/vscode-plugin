@@ -11,7 +11,7 @@ export class StatusBarService {
     }
     
     public initialize(): void {
-        const statusBarItem = window.createStatusBarItem(BAR_ITEM_ID_KEY, StatusBarAlignment.Right, 0);
+        const statusBarItem = window.createStatusBarItem(BAR_ITEM_ID_KEY, StatusBarAlignment.Right, -10);
 	    statusBarItem.name = "Nau";
 	    statusBarItem.text = "$(nau-logo) Nau";
         statusBarItem.command = COMMAND_OPEN_DASHBOARD;
