@@ -1,42 +1,23 @@
-// The module 'vscode' contains the VS Code extensibility API
-// Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import {v4 as uuidv4} from 'uuid';
+
+import {AuthService} from './services/AuthService';
+import {CommandService} from './services/CommandService';
+import {StatusBarService} from './services/StatusBarService';
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+	const statusBarService = new StatusBarService(context);
+	statusBarService.initialize();
 
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "nau-time-tracker" is now active!');
+	const authService = new AuthService(context);
+	if (!authService.isSignedIn()) {
+		authService.showSignInMessage();
+	}
 
-	vscode.window.showInformationMessage('Welcome to Nau Time Tracker. [Follow link](https://nautime.io/) to start using the plugin.');
-
-	const statusBarItem = vscode.window.createStatusBarItem(
-		"nau.time",
-		vscode.StatusBarAlignment.Right,
-		0
-	  );
-
-	  statusBarItem.name = "Nau";
-	  statusBarItem.text = "Nau";
-	  statusBarItem.tooltip = new vscode.MarkdownString(`[test-link](https://www.google.com)`);
-	  //statusBarItem.command = "prettier.openOutput";
-	  statusBarItem.backgroundColor = new vscode.ThemeColor(
-		"statusBarItem.warningBackground"
-	  );
-	  statusBarItem.show();
-
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('nau-time-tracker.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from Nau Time Tracker!');
-	});
-
-	context.subscriptions.push(disposable);
+	const commandService = new CommandService(context);
+	commandService.register();
 }
 
 // This method is called when your extension is deactivated
