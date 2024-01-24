@@ -1,4 +1,5 @@
 import {ExtensionContext, window, MarkdownString, StatusBarAlignment} from "vscode";
+import {COMMAND_OPEN_DASHBOARD} from "./CommandService";
 
 const BAR_ITEM_ID_KEY = 'nau.time';
 
@@ -13,7 +14,7 @@ export class StatusBarService {
         const statusBarItem = window.createStatusBarItem(BAR_ITEM_ID_KEY, StatusBarAlignment.Right, 0);
 	    statusBarItem.name = "Nau";
 	    statusBarItem.text = "$(nau-logo) Nau";
-        statusBarItem.command = 'nau-time-tracker.helloWorld';
+        statusBarItem.command = COMMAND_OPEN_DASHBOARD;
 	    //statusBarItem.tooltip = new MarkdownString(`[test-link](https://www.google.com)`);
 	    //statusBarItem.command = "prettier.openOutput";
 	    //statusBarItem.backgroundColor = new vscode.ThemeColor(

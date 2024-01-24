@@ -1,6 +1,7 @@
-import {ExtensionContext, commands, window} from "vscode";
+import {ExtensionContext, commands, window, env, Uri} from "vscode";
+import {APP_DASHBOARD_URL} from "../constants/domain.constans";
 
-const BAR_ITEM_ID_KEY = 'nau.time';
+export const COMMAND_OPEN_DASHBOARD = 'nau-time-tracker.open-dashboard';
 
 export class CommandService {
     private ctx: ExtensionContext;
@@ -13,12 +14,10 @@ export class CommandService {
         // The command has been defined in the package.json file
 	    // Now provide the implementation of the command with registerCommand
 	    // The commandId parameter must match the command field in package.json
-	    let disposable = commands.registerCommand('nau-time-tracker.helloWorld', () => {
-		    // The code you place here will be executed every time your command is executed
-		    // Display a message box to the user
-		    window.showInformationMessage('Hello World from Nau Time Tracker!');
+	    const openDashboard = commands.registerCommand(COMMAND_OPEN_DASHBOARD, () => {
+		    env.openExternal(Uri.parse(APP_DASHBOARD_URL));
 	    });
 
-	    this.ctx.subscriptions.push(disposable);
+	    this.ctx.subscriptions.push(openDashboard);
     } 
 }
