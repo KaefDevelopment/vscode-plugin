@@ -1,5 +1,5 @@
 import {ExtensionContext, commands, window, env, Uri} from "vscode";
-import {APP_DASHBOARD_URL} from "../constants/domain.constans";
+import {APP_DASHBOARD_URL} from "../api/constants/domain.constans";
 
 export const COMMAND_OPEN_DASHBOARD = 'nau-time-tracker.open-dashboard';
 

@@ -1,25 +1,26 @@
-import {ExtensionContext, window, MarkdownString, StatusBarAlignment} from "vscode";
+import {ExtensionContext, window, StatusBarItem, StatusBarAlignment} from "vscode";
 import {COMMAND_OPEN_DASHBOARD} from "./CommandService";
+import { secondsToHms } from "../utils/time.utils";
 
 const BAR_ITEM_ID_KEY = 'nau.time';
 
 export class StatusBarService {
     private ctx: ExtensionContext;
+    private statusBarItem: StatusBarItem;
 
     constructor(ctx: ExtensionContext) {
        this.ctx = ctx;  
+       this.statusBarItem = window.createStatusBarItem(BAR_ITEM_ID_KEY, StatusBarAlignment.Right, -10);
     }
     
     public initialize(): void {
-        const statusBarItem = window.createStatusBarItem(BAR_ITEM_ID_KEY, StatusBarAlignment.Right, -10);
-	    statusBarItem.name = "Nau";
-	    statusBarItem.text = "$(nau-logo) Nau";
-        statusBarItem.command = COMMAND_OPEN_DASHBOARD;
-	    //statusBarItem.tooltip = new MarkdownString(`[test-link](https://www.google.com)`);
-	    //statusBarItem.command = "prettier.openOutput";
-	    //statusBarItem.backgroundColor = new vscode.ThemeColor(
-	    //	"statusBarItem.warningBackground"
-	    //);
-	    statusBarItem.show();
+	    this.statusBarItem.name = "Nau";
+	    this.statusBarItem.text = "$(nau-logo) Nau";
+        this.statusBarItem.command = COMMAND_OPEN_DASHBOARD;
+	    this.statusBarItem.show();
     } 
+
+    public update(seconds: number) {
+        this.statusBarItem.text = `$(nau-logo) ${secondsToHms(seconds) || 'Nau'}`;
+    }
 }

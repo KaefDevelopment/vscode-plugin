@@ -1,6 +1,5 @@
 import {ExtensionContext, TextEditorVisibleRangesChangeEvent, TextDocument, TextDocumentChangeEvent, TextEditor, TextEditorSelectionChangeEvent, window, workspace} from "vscode";
-import {APP_ROOT_URL} from "../constants/domain.constans";
-import { getFileRelativePath } from "../utils/file.utils";
+import {getFileRelativePath} from "../utils/file.utils";
 
 const UNIQUE_ID_KEY = 'UNIQUE_ID';
 const SIGNIN_FLAG_KEY = 'SIGNIN_FLAG';
