@@ -1,6 +1,6 @@
 import {ExtensionContext, window} from "vscode";
 import {v4 as uuidv4} from 'uuid';
-import {APP_ROOT_URL} from "../api/constants/domain.constans";
+import {SIGN_IN_LINK} from "../api/constants/domain.constans";
 
 const PLUGIN_ID_KEY = 'PLUGIN_ID';
 const SIGNIN_FLAG_KEY = 'SIGNIN_FLAG';
@@ -39,8 +39,8 @@ export class AuthService {
     public showSignInMessage(): void {
         const pluginId = this.getPluginId();
         if (!!pluginId) {
-            const signInLink = `${APP_ROOT_URL}/link/${pluginId}?utm_source=plugin-vscode&utm_content=plugin_link`;
-            window.showInformationMessage(`Welcome to Nau Time Tracker. [Follow link](${signInLink}) to start using the plugin.`);
+            const signInLink = `[Follow link](${SIGN_IN_LINK(pluginId)})`;
+            window.showInformationMessage(`Welcome to Nau Time Tracker. ${signInLink} to start using the plugin.`);
         }
     }
 }

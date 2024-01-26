@@ -1,9 +1,7 @@
-import {ExtensionContext, window} from "vscode";
-import {axiosInstance} from "../api/request/request";
-import { api } from "../api";
+import {ExtensionContext} from "vscode";
+import {api} from "../api";
 
-const PLUGIN_ID_KEY = 'PLUGIN_ID';
-const SIGNIN_FLAG_KEY = 'SIGNIN_FLAG';
+const STATS_INTERVAL_MS = 10 * 1000;
 
 export class UserStatisticsService {
     private ctx: ExtensionContext;
@@ -12,10 +10,22 @@ export class UserStatisticsService {
        this.ctx = ctx;
     }
 
-    public async startFetching(onCallback: (seconds: number) => void): Promise<void> {
-        const responce = await api.statusRepository.apiFetchStatus();
-        if (responce.data?.auth) {
-            onCallback(responce.data.stats.total);
-        }
+    private _fetchStatistics(onCallback: (seconds: number) => void): void {
+        api.statusRepository.apiFetchStatus().then((responce) => {
+            if (responce.data?.auth) {
+                onCallback(responce.data.stats.total);
+            }
+        });
+    }
+
+    private _start(onCallback: (seconds: number) => void): void {
+        setInterval(() => {
+            this._fetchStatistics(onCallback);
+          }, STATS_INTERVAL_MS);
+    }
+
+    public startFetching(onCallback: (seconds: number) => void): void {
+        this._fetchStatistics(onCallback);
+        this._start(onCallback);
     }
 }

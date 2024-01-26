@@ -10,6 +10,10 @@ import {UserStatisticsService} from './services/UserStatisticsService';
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+	//context.globalState.update('PLUGIN_ID', undefined);
+	//context.globalState.update('SIGNIN_FLAG', undefined);
+	//return;
+
 	CommandService.register(context);
 
 	const statusBarService = new StatusBarService(context);
