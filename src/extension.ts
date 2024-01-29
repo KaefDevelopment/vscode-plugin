@@ -1,20 +1,21 @@
-import * as vscode from 'vscode';
+import {ExtensionContext} from 'vscode';
 
+import {CliService} from './services/CliService';
 import {AuthService} from './services/AuthService';
 import {CommandService} from './services/CommandService';
 import {StatusBarService} from './services/StatusBarService';
 import {SubscriptionService} from './services/SubscriptionService';
 import {UserStatisticsService} from './services/UserStatisticsService';
 
-let _ctx: vscode.ExtensionContext | undefined;
+let _ctx: ExtensionContext | undefined;
 
-export const safeCtx = (): vscode.ExtensionContext => {
+export const safeCtx = (): ExtensionContext => {
 	return _ctx!;
 };
 
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: ExtensionContext) {
 	_ctx = context;
 
 	//context.globalState.update('PLUGIN_ID', undefined);
@@ -33,6 +34,9 @@ export function activate(context: vscode.ExtensionContext) {
 	if (!authService.isSignedIn()) {
 		authService.showSignInMessage();
 	}
+
+	const cliService = new CliService();
+	await cliService.checkAndIntall();
 
 	const subscriptionService = new SubscriptionService();
 	subscriptionService.start();
