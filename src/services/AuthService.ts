@@ -1,39 +1,46 @@
-import {ExtensionContext, window} from "vscode";
+import {window} from "vscode";
 import {v4 as uuidv4} from 'uuid';
 import {SIGN_IN_LINK} from "../api/constants/domain.constans";
+import {updateAxiosHeaders} from "../api/request/request";
+import {safeCtx} from "../extension";
 
 const PLUGIN_ID_KEY = 'PLUGIN_ID';
 const SIGNIN_FLAG_KEY = 'SIGNIN_FLAG';
 
 export class AuthService {
-    private ctx: ExtensionContext;
-
-    constructor(ctx: ExtensionContext) {
-       this.ctx = ctx;  
+    constructor() {
     }
 
     public getPluginId(): string {
-        return this.ctx.globalState.get<string>(PLUGIN_ID_KEY) || '';
+        return safeCtx().globalState.get<string>(PLUGIN_ID_KEY) || '';
     }
 
     public getPluginVersion(): string {
-        return this.ctx.extension.packageJSON.version;
+        return safeCtx().extension.packageJSON.version;
     }
 
     public generatePluginIdIfNotExist(): void {
-        if (!this.ctx.globalState.get<string>(PLUGIN_ID_KEY)) {
-            this.ctx.globalState.update(PLUGIN_ID_KEY, uuidv4());
+        if (!safeCtx().globalState.get<string>(PLUGIN_ID_KEY)) {
+            safeCtx().globalState.update(PLUGIN_ID_KEY, uuidv4());
         }
+    }
+
+    public setAuthHeaders(): void {
+        const pluginId = this.getPluginId();
+	    const pluginVersion = this.getPluginVersion();
+	    updateAxiosHeaders(pluginId, pluginVersion);
+
+	    console.log('Plugin', pluginId, pluginVersion);
     }
     
     public isSignedIn(): boolean {
-        const pluginId = this.ctx.globalState.get<string>(PLUGIN_ID_KEY);
-        const signInFlag = this.ctx.globalState.get<string>(SIGNIN_FLAG_KEY);
+        const pluginId = safeCtx().globalState.get<string>(PLUGIN_ID_KEY);
+        const signInFlag = safeCtx().globalState.get<string>(SIGNIN_FLAG_KEY);
         return !!pluginId && !!signInFlag;
     } 
 
     public setSignInFlag(): void {
-        this.ctx.globalState.update(SIGNIN_FLAG_KEY, '1');
+        safeCtx().globalState.update(SIGNIN_FLAG_KEY, '1');
     } 
 
     public showSignInMessage(): void {

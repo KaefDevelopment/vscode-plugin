@@ -1,15 +1,12 @@
-import {ExtensionContext, TextEditorVisibleRangesChangeEvent, TextDocument, TextDocumentChangeEvent, TextEditor, TextEditorSelectionChangeEvent, window, workspace} from "vscode";
+import {TextEditorVisibleRangesChangeEvent, TextDocument, TextDocumentChangeEvent, TextEditor, TextEditorSelectionChangeEvent, window, workspace} from "vscode";
 import {getFileRelativePath} from "../utils/file.utils";
+import {safeCtx} from "../extension";
 
 const UNIQUE_ID_KEY = 'UNIQUE_ID';
 const SIGNIN_FLAG_KEY = 'SIGNIN_FLAG';
 
 export class SubscriptionService {
-    private ctx: ExtensionContext;
-
-    constructor(ctx: ExtensionContext) {
-       this.ctx = ctx;  
-    }
+    constructor() {}
 
     private onActiveTabEvent(editor: TextEditor | undefined): void {
         if (!!workspace?.name && !!editor) {
@@ -54,23 +51,23 @@ export class SubscriptionService {
     public start(): void {
         this.onActiveTabEvent(window.activeTextEditor);
 
-	    this.ctx.subscriptions.push(window.onDidChangeActiveTextEditor((editor) => {
+	    safeCtx().subscriptions.push(window.onDidChangeActiveTextEditor((editor) => {
             this.onActiveTabEvent(editor);
         }));
 
-        this.ctx.subscriptions.push(window.onDidChangeTextEditorSelection((event) => {
+        safeCtx().subscriptions.push(window.onDidChangeTextEditorSelection((event) => {
             this.onTextSelectionEvent(event);
         }));
 
-        this.ctx.subscriptions.push(window.onDidChangeTextEditorVisibleRanges((event) => {
+        safeCtx().subscriptions.push(window.onDidChangeTextEditorVisibleRanges((event) => {
             this.onScrollPositionChangedEvent(event);
         }));
 
-        this.ctx.subscriptions.push(workspace.onDidChangeTextDocument((event) => {
+        safeCtx().subscriptions.push(workspace.onDidChangeTextDocument((event) => {
             this.onFileChangedEvent(event);
         }));
 
-        this.ctx.subscriptions.push(workspace.onDidSaveTextDocument((document) => {
+        safeCtx().subscriptions.push(workspace.onDidSaveTextDocument((document) => {
             this.onFileSavedEvent(document);
         }));
     } 

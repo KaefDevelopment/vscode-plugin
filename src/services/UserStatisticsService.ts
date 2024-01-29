@@ -1,14 +1,9 @@
-import {ExtensionContext} from "vscode";
 import {api} from "../api";
 
 const STATS_INTERVAL_MS = 10 * 1000;
 
 export class UserStatisticsService {
-    private ctx: ExtensionContext;
-
-    constructor(ctx: ExtensionContext) {
-       this.ctx = ctx;
-    }
+    constructor() {}
 
     private _fetchStatistics(onCallback: (seconds: number) => void): void {
         api.statusRepository.apiFetchStatus().then((responce) => {

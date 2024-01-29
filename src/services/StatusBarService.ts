@@ -1,15 +1,13 @@
-import {ExtensionContext, window, StatusBarItem, StatusBarAlignment} from "vscode";
+import {window, StatusBarItem, StatusBarAlignment} from "vscode";
 import {COMMAND_OPEN_DASHBOARD} from "./CommandService";
-import { secondsToHms } from "../utils/time.utils";
+import {secondsToHms} from "../utils/time.utils";
 
 const BAR_ITEM_ID_KEY = 'nau.time';
 
 export class StatusBarService {
-    private ctx: ExtensionContext;
     private statusBarItem: StatusBarItem;
 
-    constructor(ctx: ExtensionContext) {
-       this.ctx = ctx;  
+    constructor() {
        this.statusBarItem = window.createStatusBarItem(BAR_ITEM_ID_KEY, StatusBarAlignment.Right, -10);
     }
     
