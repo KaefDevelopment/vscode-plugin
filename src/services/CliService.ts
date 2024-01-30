@@ -11,14 +11,50 @@ const CLI_VERSION = 'v1.0.2';
 export class CliService {
     constructor() {}
 
+    private _isMacOS(): boolean {
+        return os.platform() === 'darwin';
+    }
+
+    private _isLinux(): boolean {
+        return os.platform() === 'linux';
+    }
+
+    private _isWindows(): boolean {
+        return os.platform() === 'win32';
+    }
+
+    private _osSuffix(): string {
+        if (this._isMacOS()) {return 'darwin';}
+        if (this._isLinux()) {return 'linux';}
+        if (this._isWindows()) {return 'windows';}
+        return '';
+    }
+
+    private _cpuSuffix(): string {
+        const arch = os.arch();
+        if (arch === 'arm64') {return 'arm64';}
+        if (arch === 'x64') {return 'amd64';}
+        if (arch === 'ia32') {return '386';}
+        if (arch === 'arm') {return 'arm-5';}
+        return '';
+    }
+
+    private _zipSuffix(): string {
+        return this._isWindows() ? 'exe.zip' : 'zip';
+    }
+
+    private _cliZipFileName(): string | null {
+        const os = this._osSuffix();
+        const cpu = this._cpuSuffix();
+        const zip = this._zipSuffix();
+
+        if (!os || !cpu) {return null;}
+        return `cli-${os}-${cpu}.${zip}`;
+    }
+
     private _getDownloadCliUrl(): string | null {
-        const arch = os.arch(); // arm64
-        switch (arch) {
-            case 'arm64':
-                return `${CLI_URL}/${CLI_VERSION}/cli-darwin-arm64.zip`;
-            default: 
-                return null;
-        }
+        const zipFileName = this._cliZipFileName();
+        return !!zipFileName ? `${CLI_URL}/${CLI_VERSION}/${zipFileName}` : null;
     }
 
     private async _downloadZippedCli(zipUrl: string): Promise<Buffer | null> {
