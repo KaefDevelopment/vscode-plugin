@@ -114,12 +114,14 @@ export class CliService {
         //  /undefined_publisher.nau-time-tracker/v1.0.2/cli-darwin-arm64.zip
         const fileUri = await this._writeZippedCli(writeData, zipFileName);
         this._unzipCli(fileUri);
+
+        this.pushEvent();
     }
 
     public pushEvent(): void {
         const fileUri = this._getCliFileUri();
 
-        const proc = child_process.execFile(fileUri.fsPath, [], {}, (error, stdout, stderr) => {
+        const proc = child_process.execFile(fileUri.fsPath, ["version"], {}, (error, stdout, stderr) => {
             console.log('execFile', error, stdout, stderr);
             console.log(stdout, stderr);
         });
