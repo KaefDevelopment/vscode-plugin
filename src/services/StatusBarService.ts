@@ -1,6 +1,6 @@
 import {window, StatusBarItem, StatusBarAlignment} from "vscode";
 import {COMMAND_OPEN_DASHBOARD} from "./CommandService";
-import {secondsToHms} from "../utils/time.utils";
+import {secondsToHms} from "../core/utils/time.utils";
 
 const BAR_ITEM_ID_KEY = 'nau.time';
 

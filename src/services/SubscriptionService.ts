@@ -1,74 +1,54 @@
-import {TextEditorVisibleRangesChangeEvent, TextDocument, TextDocumentChangeEvent, TextEditor, TextEditorSelectionChangeEvent, window, workspace} from "vscode";
-import {getFileRelativePath} from "../utils/file.utils";
+import {window, workspace} from "vscode";
+import {v4 as uuidv4} from 'uuid';
+import path from 'path';
 import {safeCtx} from "../extension";
+import {IEvent} from "../core/interfaces/event.interface";
+import {EEventType} from "../core/enums/event.enum";
 
 const UNIQUE_ID_KEY = 'UNIQUE_ID';
 const SIGNIN_FLAG_KEY = 'SIGNIN_FLAG';
 
 export class SubscriptionService {
-    constructor() {}
+    private _eventsQueue: IEvent[];
 
-    private onActiveTabEvent(editor: TextEditor | undefined): void {
-        if (!!workspace?.name && !!editor) {
-            const fileFullPath = editor.document.fileName;
-            const fileRelativePath = getFileRelativePath(fileFullPath, workspace.name);
-            console.log('Tab Active', workspace.name, fileRelativePath);
-        }
+    constructor() {
+        this._eventsQueue = [];
     }
 
-    private onTextSelectionEvent(event: TextEditorSelectionChangeEvent): void {
-        if (!!workspace?.name && !!event.textEditor) {
-            const fileFullPath = event.textEditor.document.fileName;
-            const fileRelativePath = getFileRelativePath(fileFullPath, workspace.name);
-            console.log('Text selection', workspace.name, fileRelativePath);
-        }
-    }
-
-    private onFileChangedEvent(event: TextDocumentChangeEvent): void {
-        if (!!workspace?.name && !!event.document) {
-            const fileFullPath = event.document.fileName;
-            const fileRelativePath = getFileRelativePath(fileFullPath, workspace.name);
-            console.log('Doc changed', workspace.name, fileRelativePath);
-        }
-    }
-
-    private onFileSavedEvent(document: TextDocument): void {
-        if (!!workspace?.name && !!document) {
-            const fileFullPath = document.fileName;
-            const fileRelativePath = getFileRelativePath(fileFullPath, workspace.name);
-            console.log('Doc saved', workspace.name, fileRelativePath);
-        }
-    }
-
-    private onScrollPositionChangedEvent(event: TextEditorVisibleRangesChangeEvent): void {
-        if (!!workspace?.name && !!event.textEditor.document) {
-            const fileFullPath = event.textEditor.document.fileName;
-            const fileRelativePath = getFileRelativePath(fileFullPath, workspace.name);
-            console.log('Scroll position changed', workspace.name, fileRelativePath);
-        }
+    private _pushEventToQueue(type: EEventType, fileFullPath: string | undefined): void {
+        this._eventsQueue.push({
+            id: uuidv4(),
+            createdAt: new Date().toISOString(), // TODO LOCAL TIME yyyy-MM-dd'T'HH:mm:ss
+            type: type,
+            project: workspace?.name,
+            projectBaseDir: workspace?.workspaceFolders?.[0].uri.path,
+            language: fileFullPath ? path.extname(fileFullPath) : undefined,
+            target: fileFullPath,
+            branch: '',
+            params: {},
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+        });
     }
     
     public start(): void {
-        this.onActiveTabEvent(window.activeTextEditor);
-
 	    safeCtx().subscriptions.push(window.onDidChangeActiveTextEditor((editor) => {
-            this.onActiveTabEvent(editor);
+            this._pushEventToQueue(EEventType.DOCUMENT_OPEN, editor?.document.fileName);
         }));
 
         safeCtx().subscriptions.push(window.onDidChangeTextEditorSelection((event) => {
-            this.onTextSelectionEvent(event);
+            this._pushEventToQueue(EEventType.ANY, event.textEditor.document.fileName);
         }));
 
         safeCtx().subscriptions.push(window.onDidChangeTextEditorVisibleRanges((event) => {
-            this.onScrollPositionChangedEvent(event);
+            this._pushEventToQueue(EEventType.DOCUMENT_FOCUS, event.textEditor.document.fileName);
         }));
 
         safeCtx().subscriptions.push(workspace.onDidChangeTextDocument((event) => {
-            this.onFileChangedEvent(event);
+            this._pushEventToQueue(EEventType.DOCUMENT_CHANGE, event.document.fileName);
         }));
 
         safeCtx().subscriptions.push(workspace.onDidSaveTextDocument((document) => {
-            this.onFileSavedEvent(document);
+            this._pushEventToQueue(EEventType.DOCUMENT_SAVE, document.fileName);
         }));
     } 
 }
