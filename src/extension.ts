@@ -35,7 +35,7 @@ export async function activate(context: ExtensionContext) {
 		authService.showSignInMessage();
 	}
 
-	const cliService = new CliService();
+	const cliService = new CliService('v1.0.2'); // TODO
 	await cliService.checkAndIntall();
 
 	const subscriptionService = new SubscriptionService();

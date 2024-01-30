@@ -1,17 +1,21 @@
 import {Uri, workspace} from "vscode";
 import * as os from "os";
 import * as fs from "fs";
-import * as child_process from 'child_process';
+import * as process from 'child_process';
 import AdmZip from "adm-zip";
 import {posix} from "path";
 import {api} from "../api";
 import {safeCtx} from "../extension";
 import {CLI_URL} from "../api/constants/domain.constans";
 
-const CLI_VERSION = 'v1.0.2';
-
 export class CliService {
-    constructor() {}
+    private _storageUri: Uri;
+    private _cliVersion: string;
+
+    constructor(cliVersion: string) {
+        this._storageUri = safeCtx().globalStorageUri;
+        this._cliVersion = cliVersion;
+    }
 
     private _isMacOS(): boolean {
         return os.platform() === 'darwin';
@@ -69,12 +73,11 @@ export class CliService {
 
     private _getCliFileUri(): Uri {
         const cliFilename = this._cliFileName() || '';
-        const storageUri = safeCtx().globalStorageUri;
-        return storageUri.with({path: posix.join(storageUri.path, CLI_VERSION, cliFilename)});
+        return this._storageUri.with({path: posix.join(this._storageUri.path, this._cliVersion, cliFilename)});
     }
 
     private _getDownloadCliUrl(zipFileName: string): string {
-        return `${CLI_URL}/${CLI_VERSION}/${zipFileName}`;
+        return `${CLI_URL}/${this._cliVersion}/${zipFileName}`;
     }
 
     private async _downloadZippedCli(zipUrl: string): Promise<Buffer | null> {
@@ -82,17 +85,14 @@ export class CliService {
     }
 
     private async _writeZippedCli(writeData: Buffer, zipFileName: string): Promise<Uri> {
-        const storageUri = safeCtx().globalStorageUri;
-
-        const fileUri = storageUri.with({path: posix.join(storageUri.path, CLI_VERSION, zipFileName)});
+        const fileUri = this._storageUri.with({path: posix.join(this._storageUri.path, this._cliVersion, zipFileName)});
         await workspace.fs.writeFile(fileUri, writeData);
 
         return fileUri;
     }
 
     private _unzipCli(zipUri: Uri): void {
-        const storageUri = safeCtx().globalStorageUri;
-        const folderUri = storageUri.with({path: posix.join(storageUri.path, CLI_VERSION)});
+        const folderUri = this._storageUri.with({path: posix.join(this._storageUri.path, this._cliVersion)});
         
         const zip = new AdmZip(zipUri.fsPath);
         zip.extractAllTo(folderUri.fsPath, true);
@@ -101,7 +101,16 @@ export class CliService {
         fs.chmodSync(fileUri.fsPath, 0o755);
     }
 
+    private _isCliIntalled(): boolean {
+        const fileUri = this._getCliFileUri();
+        return fs.existsSync(fileUri.fsPath);
+    }
+
     public async checkAndIntall(): Promise<void> {
+        if (this._isCliIntalled()) {
+            return;
+        }
+
         const zipFileName = this._cliZipFileName();
         if (!zipFileName) {return;}
 
@@ -114,14 +123,12 @@ export class CliService {
         //  /undefined_publisher.nau-time-tracker/v1.0.2/cli-darwin-arm64.zip
         const fileUri = await this._writeZippedCli(writeData, zipFileName);
         this._unzipCli(fileUri);
-
-        this.pushEvent();
     }
 
     public pushEvent(): void {
         const fileUri = this._getCliFileUri();
 
-        const proc = child_process.execFile(fileUri.fsPath, ["version"], {}, (error, stdout, stderr) => {
+        const proc = process.execFile(fileUri.fsPath, ["version"], {}, (error, stdout, stderr) => {
             console.log('execFile', error, stdout, stderr);
             console.log(stdout, stderr);
         });
