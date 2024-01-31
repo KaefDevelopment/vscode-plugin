@@ -1,20 +1,27 @@
 import {Uri, workspace} from "vscode";
 import * as os from "os";
 import * as fs from "fs";
-import * as process from 'child_process';
+import * as childProcess from 'child_process';
 import AdmZip from "adm-zip";
-import {posix} from "path";
 import {api} from "../api";
-import {safeCtx} from "../extension";
 import {CLI_URL} from "../api/constants/domain.constans";
 
+const CLI_NAME = "cli";
+const CLI_FOLDER = "nau"; // TODO '.nau'
+
 export class CliService {
-    private _storageUri: Uri;
     private _cliVersion: string;
+    private _cliFolderUri: Uri;
+    private _cliName: string;
+    private _cliFileUri: Uri;
 
     constructor(cliVersion: string) {
-        this._storageUri = safeCtx().globalStorageUri;
+        const homeFolder = process.env[this._isWindows() ? 'USERPROFILE' : 'HOME'] || process.cwd();
+
         this._cliVersion = cliVersion;
+        this._cliFolderUri = Uri.joinPath(Uri.parse(homeFolder), CLI_FOLDER);
+        this._cliName = this._isWindows() ? `${CLI_NAME}.exe` : CLI_NAME;
+        this._cliFileUri = Uri.joinPath(this._cliFolderUri, this._cliName);
     }
 
     private _isMacOS(): boolean {
@@ -53,7 +60,7 @@ export class CliService {
         return this._isWindows() ? '.exe' : '';
     }
 
-    private _cliZipFileName(): string | null {
+    private _zipFileName(): string | null {
         const os = this._osSuffix();
         const cpu = this._cpuSuffix();
         const zip = this._zipSuffix();
@@ -62,18 +69,11 @@ export class CliService {
         return `cli-${os}-${cpu}${zip}`;
     }
 
-    private _cliFileName(): string | null {
+    private _unzippedFileName(): string {
         const os = this._osSuffix();
         const cpu = this._cpuSuffix();
         const extension = this._fileExtension();
-
-        if (!os || !cpu) {return null;}
         return `cli-${os}-${cpu}${extension}`;
-    }
-
-    private _getCliFileUri(): Uri {
-        const cliFilename = this._cliFileName() || '';
-        return this._storageUri.with({path: posix.join(this._storageUri.path, this._cliVersion, cliFilename)});
     }
 
     private _getDownloadCliUrl(zipFileName: string): string {
@@ -85,25 +85,23 @@ export class CliService {
     }
 
     private async _writeZippedCli(writeData: Buffer, zipFileName: string): Promise<Uri> {
-        const fileUri = this._storageUri.with({path: posix.join(this._storageUri.path, this._cliVersion, zipFileName)});
-        await workspace.fs.writeFile(fileUri, writeData);
-
-        return fileUri;
+        const zipUri = Uri.joinPath(this._cliFolderUri, zipFileName);
+        await workspace.fs.writeFile(zipUri, writeData);
+        return zipUri;
     }
 
     private _unzipCli(zipUri: Uri): void {
-        const folderUri = this._storageUri.with({path: posix.join(this._storageUri.path, this._cliVersion)});
-        
         const zip = new AdmZip(zipUri.fsPath);
-        zip.extractAllTo(folderUri.fsPath, true);
+        zip.extractAllTo(this._cliFolderUri.fsPath, true);
 
-        const fileUri = this._getCliFileUri();
-        fs.chmodSync(fileUri.fsPath, 0o755);
+        const zippedFileUri = Uri.joinPath(this._cliFolderUri, this._unzippedFileName());
+        fs.renameSync(zippedFileUri.fsPath, this._cliFileUri.fsPath);
+        fs.chmodSync(this._cliFileUri.fsPath, 0o755);
+        fs.unlinkSync(zipUri.fsPath);
     }
 
     private _isCliIntalled(): boolean {
-        const fileUri = this._getCliFileUri();
-        return fs.existsSync(fileUri.fsPath);
+        return fs.existsSync(this._cliFileUri.fsPath);
     }
 
     public async checkAndIntall(): Promise<void> {
@@ -111,7 +109,7 @@ export class CliService {
             return;
         }
 
-        const zipFileName = this._cliZipFileName();
+        const zipFileName = this._zipFileName();
         if (!zipFileName) {return;}
 
         const downloadUrl = this._getDownloadCliUrl(zipFileName);
@@ -119,16 +117,12 @@ export class CliService {
         const writeData = await this._downloadZippedCli(downloadUrl);
         if (!writeData) {return;}
 
-        // ~/Library/Application%20Support/Code/User/globalStorage
-        //  /undefined_publisher.nau-time-tracker/v1.0.2/cli-darwin-arm64.zip
         const fileUri = await this._writeZippedCli(writeData, zipFileName);
         this._unzipCli(fileUri);
     }
 
     public pushEvent(): void {
-        const fileUri = this._getCliFileUri();
-
-        const proc = process.execFile(fileUri.fsPath, ["version"], {}, (error, stdout, stderr) => {
+        const proc = childProcess.execFile(this._cliFileUri.fsPath, ["version"], {}, (error, stdout, stderr) => {
             console.log('execFile', error, stdout, stderr);
             console.log(stdout, stderr);
         });
