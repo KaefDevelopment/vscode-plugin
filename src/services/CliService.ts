@@ -3,11 +3,15 @@ import * as os from "os";
 import * as fs from "fs";
 import * as childProcess from 'child_process';
 import AdmZip from "adm-zip";
+import {SubscriptionService} from "./SubscriptionService";
+import {IEvent} from "../core/interfaces/event.interface";
+import {API_EVENTS_URL, CLI_URL} from "../api/constants/domain.constans";
 import {api} from "../api";
-import {CLI_URL} from "../api/constants/domain.constans";
+import { AuthService } from "./AuthService";
 
 const CLI_NAME = "cli";
 const CLI_FOLDER = "nau"; // TODO '.nau'
+const EVENT_INTERVAL_MS = 60 * 1000;
 
 export class CliService {
     private _cliVersion: string;
@@ -100,12 +104,37 @@ export class CliService {
         fs.unlinkSync(zipUri.fsPath);
     }
 
-    private _isCliIntalled(): boolean {
+    private _isCliInstalled(): boolean {
         return fs.existsSync(this._cliFileUri.fsPath);
     }
 
+    public _formatEventsBunch(): string | null {        
+        const eventList: IEvent[] = SubscriptionService.popEvents();
+        if (eventList.length === 0) {
+            return null;
+        }
+
+        return JSON.stringify({events: eventList});
+    }
+
+    public _sendEventsBunch(eventBunchStr: string): void {
+        const cmds: string[] = ["event"];
+        cmds.push(`-a=${AuthService.isSignedIn()}`);
+        cmds.push("-d", eventBunchStr);
+        cmds.push("-k", AuthService.getPluginId());
+        cmds.push("-s", API_EVENTS_URL);
+
+        /*const proc = childProcess.execFile(this._cliFileUri.fsPath, ["version"], {}, (error, stdout, stderr) => {
+            console.log('execFile', error, stdout, stderr);
+        });*/
+
+        childProcess.execFile(this._cliFileUri.fsPath, cmds, {}, (error, stdout, stderr) => {
+            console.log('exec cli', error, stdout, stderr);
+        });
+    }
+
     public async checkAndIntall(): Promise<void> {
-        if (this._isCliIntalled()) {
+        if (this._isCliInstalled()) {
             return;
         }
 
@@ -121,16 +150,14 @@ export class CliService {
         this._unzipCli(fileUri);
     }
 
-    public pushEvent(): void {
-        const proc = childProcess.execFile(this._cliFileUri.fsPath, ["version"], {}, (error, stdout, stderr) => {
-            console.log('execFile', error, stdout, stderr);
-            console.log(stdout, stderr);
-        });
-
-        if (proc.stdout) {
-            proc.stdout.on('data', (data: string | null) => {
-                console.log('execFile data', data);
-            });
-        }
+    public startPushingEvents(): void {
+        setInterval(() => {
+            if (this._isCliInstalled()) {
+                const eventsStr = this._formatEventsBunch();
+                if (eventsStr) {
+                    this._sendEventsBunch(eventsStr);
+                }
+            }
+          }, EVENT_INTERVAL_MS);
     }
 }

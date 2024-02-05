@@ -9,17 +9,13 @@ const UNIQUE_ID_KEY = 'UNIQUE_ID';
 const SIGNIN_FLAG_KEY = 'SIGNIN_FLAG';
 
 export class SubscriptionService {
-    private _eventsQueue: IEvent[];
+    private static _eventsQueue: IEvent[] = [];
 
-    constructor() {
-        this._eventsQueue = [];
-    }
-
-    private _pushEventToQueue(type: EEventType, fileFullPath: string | undefined): void {
+    private static _pushEventToQueue(type: EEventType, fileFullPath: string | undefined): void {
         this._eventsQueue.push({
             id: uuidv4(),
-            createdAt: new Date().toISOString(), // TODO LOCAL TIME yyyy-MM-dd'T'HH:mm:ss
-            type: type,
+            createdAt: new Date().toLocaleString('sv').replace(' ', 'T'),
+            type: type.toString(),
             project: workspace?.name,
             projectBaseDir: workspace?.workspaceFolders?.[0].uri.path,
             language: fileFullPath ? path.extname(fileFullPath) : undefined,
@@ -29,8 +25,12 @@ export class SubscriptionService {
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
         });
     }
+
+    public static popEvents = (): IEvent[] => {
+        return this._eventsQueue.splice(0, this._eventsQueue.length);
+    };
     
-    public start(): void {
+    public static start(): void {
 	    safeCtx().subscriptions.push(window.onDidChangeActiveTextEditor((editor) => {
             this._pushEventToQueue(EEventType.DOCUMENT_OPEN, editor?.document.fileName);
         }));

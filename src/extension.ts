@@ -27,23 +27,22 @@ export async function activate(context: ExtensionContext) {
 	const statusBarService = new StatusBarService();
 	statusBarService.initialize();
 
-	const authService = new AuthService();
-	authService.generatePluginIdIfNotExist();
-	authService.setAuthHeaders();
+	AuthService.generatePluginIdIfNotExist();
+	AuthService.setAuthHeaders();
 
-	if (!authService.isSignedIn()) {
-		authService.showSignInMessage();
+	if (!AuthService.isSignedIn()) {
+		AuthService.showSignInMessage();
 	}
 
 	const cliService = new CliService('v1.0.2'); // TODO
 	await cliService.checkAndIntall();
+	cliService.startPushingEvents();
 
-	const subscriptionService = new SubscriptionService();
-	subscriptionService.start();
+	SubscriptionService.start();
 
 	const userStatisticsService = new UserStatisticsService();
 	userStatisticsService.startFetching((seconds: number) => {
-		authService.setSignInFlag.bind(authService)();
+		AuthService.setSignInFlag();
 		statusBarService.update.bind(statusBarService)(seconds);
 	});
 }

@@ -1,14 +1,14 @@
 import {EEventType} from "../enums/event.enum";
 
 export interface IEvent {
-    id: string; // random uuid
-    createdAt: string; // localDateTime ISO
-    type: EEventType;
+    id: string;
+    createdAt: string;
+    type: EEventType | string;
     project?: string;
     projectBaseDir?: string | null;
     language?: string;
     target?: string;
     branch?: string;
     params?: Record<string, string>
-    timezone: string; // ZoneId.systemDefault().id
+    timezone: string;
 }

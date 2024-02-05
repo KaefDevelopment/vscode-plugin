@@ -8,24 +8,21 @@ const PLUGIN_ID_KEY = 'PLUGIN_ID';
 const SIGNIN_FLAG_KEY = 'SIGNIN_FLAG';
 
 export class AuthService {
-    constructor() {
-    }
-
-    public getPluginId(): string {
+    public static getPluginId(): string {
         return safeCtx().globalState.get<string>(PLUGIN_ID_KEY) || '';
     }
 
-    public getPluginVersion(): string {
+    public static getPluginVersion(): string {
         return safeCtx().extension.packageJSON.version;
     }
 
-    public generatePluginIdIfNotExist(): void {
+    public static generatePluginIdIfNotExist(): void {
         if (!safeCtx().globalState.get<string>(PLUGIN_ID_KEY)) {
             safeCtx().globalState.update(PLUGIN_ID_KEY, uuidv4());
         }
     }
 
-    public setAuthHeaders(): void {
+    public static setAuthHeaders(): void {
         const pluginId = this.getPluginId();
 	    const pluginVersion = this.getPluginVersion();
 	    updateAxiosHeaders(pluginId, pluginVersion);
@@ -33,17 +30,17 @@ export class AuthService {
 	    console.log('Plugin', pluginId, pluginVersion);
     }
     
-    public isSignedIn(): boolean {
+    public static isSignedIn(): boolean {
         const pluginId = safeCtx().globalState.get<string>(PLUGIN_ID_KEY);
         const signInFlag = safeCtx().globalState.get<string>(SIGNIN_FLAG_KEY);
         return !!pluginId && !!signInFlag;
     } 
 
-    public setSignInFlag(): void {
+    public static setSignInFlag(): void {
         safeCtx().globalState.update(SIGNIN_FLAG_KEY, '1');
     } 
 
-    public showSignInMessage(): void {
+    public static showSignInMessage(): void {
         const pluginId = this.getPluginId();
         if (!!pluginId) {
             const signInLink = `[Follow link](${SIGN_IN_LINK(pluginId)})`;
