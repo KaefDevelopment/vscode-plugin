@@ -2,6 +2,7 @@ import {EEventType} from "../enums/event.enum";
 
 export interface IEvent {
     id: string;
+    pluginId: string;
     createdAt: string;
     type: EEventType | string;
     project?: string;

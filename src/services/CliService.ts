@@ -3,11 +3,11 @@ import * as os from "os";
 import * as fs from "fs";
 import * as childProcess from 'child_process';
 import AdmZip from "adm-zip";
+import {AuthService} from "./AuthService";
 import {SubscriptionService} from "./SubscriptionService";
 import {IEvent} from "../core/interfaces/event.interface";
 import {API_EVENTS_URL, CLI_URL} from "../api/constants/domain.constans";
 import {api} from "../api";
-import { AuthService } from "./AuthService";
 
 const CLI_NAME = "cli";
 const CLI_FOLDER = "nau"; // TODO '.nau'
