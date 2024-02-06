@@ -2,8 +2,9 @@ import {window, workspace} from "vscode";
 import {v4 as uuidv4} from 'uuid';
 import path from 'path';
 import {safeCtx} from "../extension";
-import {IEvent} from "../core/interfaces/event.interface";
 import {EEventType} from "../core/enums/event.enum";
+import {getLocalIsoTime} from "../core/utils/time.utils";
+import {IEvent} from "../core/interfaces/event.interface";
 
 const UNIQUE_ID_KEY = 'UNIQUE_ID';
 const SIGNIN_FLAG_KEY = 'SIGNIN_FLAG';
@@ -11,10 +12,10 @@ const SIGNIN_FLAG_KEY = 'SIGNIN_FLAG';
 export class SubscriptionService {
     private static _eventsQueue: IEvent[] = [];
 
-    private static _pushEventToQueue(type: EEventType, fileFullPath: string | undefined): void {
+    private static _pushEventToQueue(type: EEventType, fileFullPath: string): void {
         this._eventsQueue.push({
             id: uuidv4(),
-            createdAt: new Date().toLocaleString('sv').replace(' ', 'T'),
+            createdAt: getLocalIsoTime(),
             type: type.toString(),
             project: workspace?.name,
             projectBaseDir: workspace?.workspaceFolders?.[0].uri.path,
@@ -32,7 +33,9 @@ export class SubscriptionService {
     
     public static start(): void {
 	    safeCtx().subscriptions.push(window.onDidChangeActiveTextEditor((editor) => {
-            this._pushEventToQueue(EEventType.DOCUMENT_OPEN, editor?.document.fileName);
+            if (!!editor?.document.fileName) {
+                this._pushEventToQueue(EEventType.DOCUMENT_OPEN, editor?.document.fileName);
+            }
         }));
 
         safeCtx().subscriptions.push(window.onDidChangeTextEditorSelection((event) => {

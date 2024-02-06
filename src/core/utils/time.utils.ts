@@ -14,3 +14,7 @@ export const secondsToHms = (minutes: number): string => {
 
     return array.join(' '); 
 };
+
+export const getLocalIsoTime = (): string => {
+    return new Date().toLocaleString('sv').replace(' ', 'T');
+};

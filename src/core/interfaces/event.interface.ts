@@ -7,9 +7,9 @@ export interface IEvent {
     project?: string;
     projectBaseDir?: string | null;
     language?: string;
-    target?: string;
+    target: string;
     branch?: string;
-    params?: Record<string, string>
+    params?: Record<string, string | number>
     timezone: string;
 }
 

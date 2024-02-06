@@ -4,15 +4,17 @@ import * as fs from "fs";
 import * as childProcess from 'child_process';
 import AdmZip from "adm-zip";
 import {AuthService} from "./AuthService";
+import {LoggerService} from "./LoggerService";
+import {groupBy} from "../core/utils/array.utils";
 import {SubscriptionService} from "./SubscriptionService";
 import {IEvent, IEventBunch} from "../core/interfaces/event.interface";
 import {API_EVENTS_URL, CLI_URL} from "../api/constants/domain.constans";
 import {api} from "../api";
-import { LoggerService } from "./LoggerService";
 
 const CLI_NAME = "cli";
 const CLI_FOLDER = ".nau";
-const EVENT_INTERVAL_MS = 30 * 1000;
+const CLI_STABLE_VERSION = 'v1.0.4';
+const EVENT_INTERVAL_MS = 60 * 1000;
 
 export class CliService {
     private _cliFolderUri: Uri;
@@ -118,9 +120,25 @@ export class CliService {
             return null;
         }
 
+        const groupedEvents: Map<string,IEvent[]> = groupBy(eventList, item => item.target);
+        const filteredEvents: IEvent[] = [];
+        Object.values(Object.fromEntries(groupedEvents)).map((events: IEvent[]) => {
+            if (events.length > 0) {
+                filteredEvents.push(events[0]);
+                filteredEvents.push({
+                    ...events[events.length - 1],
+                    params: {count: events.length - 1}
+                });
+            }
+        });
+
+        filteredEvents.sort((a, b) => {
+            return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+        });
+
         return {
-            amount: eventList.length,
-            eventsJson: JSON.stringify({events: eventList})
+            amount: filteredEvents.length,
+            eventsJson: JSON.stringify({events: filteredEvents})
         };
     }
 
@@ -150,7 +168,7 @@ export class CliService {
 
     public async checkAndIntall(): Promise<void> {
         const latestVersion = await this._getLatestCliVersion();
-        const targetVersion = latestVersion === 'v1.0.1' ? 'v1.0.5' : 'v1.0.1'; // TODO: REMOVE
+        const targetVersion = latestVersion || CLI_STABLE_VERSION;
 
         // TODO: Update installed cli
         if (this._isCliInstalled()) {

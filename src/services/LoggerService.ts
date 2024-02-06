@@ -1,6 +1,7 @@
 import {workspace, Uri} from "vscode";
 import * as fs from "fs";
 import {safeCtx} from "../extension";
+import {getLocalIsoTime} from "../core/utils/time.utils";
 
 const LOG_FOLDER = ".nau";
 const LOG_FILENAME = "plugin-logger.txt";
@@ -41,7 +42,7 @@ export class LoggerService {
 
 	public static log(input: string, type: 'error' | 'warn' | 'info' = 'info'): void {
 		try {
-			const message = `${new Date().toLocaleString('sv').replace(' ', 'T')} - ${type.toUpperCase()} - ${input}\n`;
+			const message = `${getLocalIsoTime()} - ${type.toUpperCase()} - ${input}\n`;
 			fs.appendFileSync(this._getLoggerFileUri().fsPath, message);
 		}	
 		catch(ex) {

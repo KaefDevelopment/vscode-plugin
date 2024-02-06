@@ -14,8 +14,11 @@ export const safeCtx = (): ExtensionContext => {
 	return _ctx!;
 };
 
-// Cli - /Users/{user}/.nau
-// Logger - /Library/Application Support/Code/User/globalStorage/{plugin}/.nau
+/* 
+	Base paths:
+	Cli file: /Users/{user}/.nau
+ 	Logger file: - ~/Library/Application Support/Code/User/globalStorage/{plugin}/.nau
+ */
 export async function activate(context: ExtensionContext) {
 	_ctx = context;
 
