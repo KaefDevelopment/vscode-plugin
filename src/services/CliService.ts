@@ -8,6 +8,7 @@ import {SubscriptionService} from "./SubscriptionService";
 import {IEvent, IEventBunch} from "../core/interfaces/event.interface";
 import {API_EVENTS_URL, CLI_URL} from "../api/constants/domain.constans";
 import {api} from "../api";
+import { LoggerService } from "./LoggerService";
 
 const CLI_NAME = "cli";
 const CLI_FOLDER = ".nau";
@@ -123,6 +124,12 @@ export class CliService {
         };
     }
 
+    public _logCliVersion(): void {
+        childProcess.execFile(this._cliFileUri.fsPath, ["version"], {}, (error, stdout, stderr) => {
+            LoggerService.log(`Cli already installed. Current version: ${stdout}`);
+        });
+    }
+
     public _sendEventsBunch(events: IEventBunch): void {
         const cmds: string[] = ["event"];
         cmds.push(`-a=${AuthService.isSignedIn()}`);
@@ -132,12 +139,13 @@ export class CliService {
 
         childProcess.execFile(this._cliFileUri.fsPath, cmds, {}, (error, stdout, stderr) => {
             const success = !error && !!stdout ? JSON.parse(stdout).status : false;
-            console.log(`Pushing ${events.amount} events: ${success}.`, stdout);
-        });
+            console.log(`Events ${events.amount} pushed: ${success}.`);
 
-        /*const proc = childProcess.execFile(this._cliFileUri.fsPath, ["version"], {}, (error, stdout, stderr) => {
-            console.log('execFile', error, stdout, stderr);
-        });*/
+            LoggerService.log(`${events.amount} events pushed. Result: ${success}.`);
+            if (error) {
+                LoggerService.log(`Events pushing error: ${success}: error=${error}, stdout=${stdout}, stderr=${stderr}.`);
+            }
+        });
     }
 
     public async checkAndIntall(): Promise<void> {
@@ -146,12 +154,15 @@ export class CliService {
 
         // TODO: Update installed cli
         if (this._isCliInstalled()) {
+            this._logCliVersion();
             return;
         }
 
         const zipFileName = this._zipFileName();
         if (!zipFileName) {return;}
 
+        LoggerService.log(`Cli ${targetVersion} is installing...`);
+        LoggerService.log(`Cli name ${zipFileName}.`);
         const downloadUrl = this._getDownloadCliUrl(zipFileName, targetVersion);
 
         const writeData = await this._downloadZippedCli(downloadUrl);
@@ -160,7 +171,7 @@ export class CliService {
         const fileUri = await this._writeZippedCli(writeData, zipFileName);
         this._unzipCli(fileUri);
 
-        console.log(`Cli version ${targetVersion} installed`);
+        LoggerService.log(`Cli ${targetVersion} successfully installed.`);
     }
 
     public startPushingEvents(): void {

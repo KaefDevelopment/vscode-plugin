@@ -6,6 +6,7 @@ import {CommandService} from './services/CommandService';
 import {StatusBarService} from './services/StatusBarService';
 import {SubscriptionService} from './services/SubscriptionService';
 import {UserStatisticsService} from './services/UserStatisticsService';
+import {LoggerService} from './services/LoggerService';
 
 let _ctx: ExtensionContext | undefined;
 
@@ -13,8 +14,8 @@ export const safeCtx = (): ExtensionContext => {
 	return _ctx!;
 };
 
-// This method is called when your extension is activated
-// Your extension is activated the very first time the command is executed
+// Cli - /Users/{user}/.nau
+// Logger - /Library/Application Support/Code/User/globalStorage/{plugin}/.nau
 export async function activate(context: ExtensionContext) {
 	_ctx = context;
 
@@ -23,26 +24,37 @@ export async function activate(context: ExtensionContext) {
 	//return;
 
 	CommandService.register();
+	await LoggerService.initialize();
 
-	AuthService.generatePluginIdIfNotExist();
-	AuthService.setAuthHeaders();
-	if (!AuthService.isSignedIn()) {
-		AuthService.showSignInMessage();
+	try 
+	{
+		AuthService.generatePluginIdIfNotExist();
+		AuthService.setAuthHeaders();
+		if (!AuthService.isSignedIn()) {
+			AuthService.showSignInMessage();
+		}
+
+		SubscriptionService.start();
+
+		const cliService = new CliService();
+		await cliService.checkAndIntall();
+		cliService.startPushingEvents();
+
+		const statusBarService = new StatusBarService();
+		statusBarService.initialize();
+
+		UserStatisticsService.startFetching((seconds: number) => {
+			AuthService.setSignInFlag();
+			statusBarService.update.bind(statusBarService)(seconds);
+		});
 	}
-
-	SubscriptionService.start();
-
-	const cliService = new CliService();
-	await cliService.checkAndIntall();
-	cliService.startPushingEvents();
-
-	const statusBarService = new StatusBarService();
-	statusBarService.initialize();
-
-	UserStatisticsService.startFetching((seconds: number) => {
-		AuthService.setSignInFlag();
-		statusBarService.update.bind(statusBarService)(seconds);
-	});
+    catch (ex) {
+        if (typeof ex === "string") {
+			LoggerService.log(ex);
+		} else if (ex instanceof Error) {
+			LoggerService.log(ex.message);
+		}
+    }
 }
 
 // This method is called when your extension is deactivated
