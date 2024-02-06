@@ -11,17 +11,17 @@ import {api} from "../api";
 
 const CLI_NAME = "cli";
 const CLI_FOLDER = "nau"; // TODO '.nau'
-const EVENT_INTERVAL_MS = 60 * 1000;
+const EVENT_INTERVAL_MS = 10 * 1000;
 
 export class CliService {
     private _cliVersion: string;
     private _cliFolderUri: Uri;
-    private _cliName: string;
-    private _cliFileUri: Uri;
+    private _cliName: string; 
+    private _cliFileUri: Uri; 
 
     constructor(cliVersion: string) {
         const homeFolder = process.env[this._isWindows() ? 'USERPROFILE' : 'HOME'] || process.cwd();
-
+ 
         this._cliVersion = cliVersion;
         this._cliFolderUri = Uri.joinPath(Uri.parse(homeFolder), CLI_FOLDER);
         this._cliName = this._isWindows() ? `${CLI_NAME}.exe` : CLI_NAME;

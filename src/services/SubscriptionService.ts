@@ -1,7 +1,6 @@
 import {window, workspace} from "vscode";
 import {v4 as uuidv4} from 'uuid';
 import path from 'path';
-import {AuthService} from "./AuthService";
 import {safeCtx} from "../extension";
 import {IEvent} from "../core/interfaces/event.interface";
 import {EEventType} from "../core/enums/event.enum";
@@ -15,7 +14,6 @@ export class SubscriptionService {
     private static _pushEventToQueue(type: EEventType, fileFullPath: string | undefined): void {
         this._eventsQueue.push({
             id: uuidv4(),
-            pluginId: AuthService.getPluginId(),
             createdAt: new Date().toLocaleString('sv').replace(' ', 'T'),
             type: type.toString(),
             project: workspace?.name,
