@@ -26,7 +26,6 @@ export class AuthService {
         const pluginId = this.getPluginId();
 	    const pluginVersion = this.getPluginVersion();
 	    updateAxiosHeaders(pluginId, pluginVersion);
-
 	    console.log('Plugin', pluginId, pluginVersion);
     }
     

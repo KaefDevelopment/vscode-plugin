@@ -2,8 +2,9 @@ import * as statusRepository from './repositories/statusRepository/statusReposit
 import * as cliRepository from './repositories/cliRepository/cliRepository.api';
 
 export const api = {
-    statusRepository,
-    cliRepository
+    cliRepository,
+    statusRepository
 };
 
+export * from './repositories/cliRepository/cliRepository.api.types';
 export * from './repositories/statusRepository/statusRepository.api.types';

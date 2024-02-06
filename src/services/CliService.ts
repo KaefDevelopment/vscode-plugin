@@ -5,24 +5,22 @@ import * as childProcess from 'child_process';
 import AdmZip from "adm-zip";
 import {AuthService} from "./AuthService";
 import {SubscriptionService} from "./SubscriptionService";
-import {IEvent} from "../core/interfaces/event.interface";
+import {IEvent, IEventBunch} from "../core/interfaces/event.interface";
 import {API_EVENTS_URL, CLI_URL} from "../api/constants/domain.constans";
 import {api} from "../api";
 
 const CLI_NAME = "cli";
-const CLI_FOLDER = "nau"; // TODO '.nau'
-const EVENT_INTERVAL_MS = 10 * 1000;
+const CLI_FOLDER = ".nau";
+const EVENT_INTERVAL_MS = 30 * 1000;
 
 export class CliService {
-    private _cliVersion: string;
     private _cliFolderUri: Uri;
     private _cliName: string; 
     private _cliFileUri: Uri; 
 
-    constructor(cliVersion: string) {
+    constructor() {
         const homeFolder = process.env[this._isWindows() ? 'USERPROFILE' : 'HOME'] || process.cwd();
  
-        this._cliVersion = cliVersion;
         this._cliFolderUri = Uri.joinPath(Uri.parse(homeFolder), CLI_FOLDER);
         this._cliName = this._isWindows() ? `${CLI_NAME}.exe` : CLI_NAME;
         this._cliFileUri = Uri.joinPath(this._cliFolderUri, this._cliName);
@@ -80,12 +78,17 @@ export class CliService {
         return `cli-${os}-${cpu}${extension}`;
     }
 
-    private _getDownloadCliUrl(zipFileName: string): string {
-        return `${CLI_URL}/${this._cliVersion}/${zipFileName}`;
+    private async _getLatestCliVersion(): Promise<string | null> {
+        const responce = await api.cliRepository.fetchCliVersion();
+        return responce.data?.cliVersion || null;
+    }
+
+    private _getDownloadCliUrl(zipFileName: string, cliVersion: string): string {
+        return `${CLI_URL}/${cliVersion}/${zipFileName}`;
     }
 
     private async _downloadZippedCli(zipUrl: string): Promise<Buffer | null> {
-        return await api.cliRepository.apiDowloadZippedCli(zipUrl);
+        return await api.cliRepository.dowloadZippedCli(zipUrl);
     }
 
     private async _writeZippedCli(writeData: Buffer, zipFileName: string): Promise<Uri> {
@@ -108,32 +111,40 @@ export class CliService {
         return fs.existsSync(this._cliFileUri.fsPath);
     }
 
-    public _formatEventsBunch(): string | null {        
+    public _formatEventsBunch(): IEventBunch | null {        
         const eventList: IEvent[] = SubscriptionService.popEvents();
         if (eventList.length === 0) {
             return null;
         }
 
-        return JSON.stringify({events: eventList});
+        return {
+            amount: eventList.length,
+            eventsJson: JSON.stringify({events: eventList})
+        };
     }
 
-    public _sendEventsBunch(eventBunchStr: string): void {
+    public _sendEventsBunch(events: IEventBunch): void {
         const cmds: string[] = ["event"];
         cmds.push(`-a=${AuthService.isSignedIn()}`);
-        cmds.push("-d", eventBunchStr);
+        cmds.push("-d", events.eventsJson);
         cmds.push("-k", AuthService.getPluginId());
         cmds.push("-s", API_EVENTS_URL);
+
+        childProcess.execFile(this._cliFileUri.fsPath, cmds, {}, (error, stdout, stderr) => {
+            const success = !error && !!stdout ? JSON.parse(stdout).status : false;
+            console.log(`Pushing ${events.amount} events: ${success}.`, stdout);
+        });
 
         /*const proc = childProcess.execFile(this._cliFileUri.fsPath, ["version"], {}, (error, stdout, stderr) => {
             console.log('execFile', error, stdout, stderr);
         });*/
-
-        childProcess.execFile(this._cliFileUri.fsPath, cmds, {}, (error, stdout, stderr) => {
-            console.log('exec cli', error, stdout, stderr);
-        });
     }
 
     public async checkAndIntall(): Promise<void> {
+        const latestVersion = await this._getLatestCliVersion();
+        const targetVersion = latestVersion === 'v1.0.1' ? 'v1.0.5' : 'v1.0.1'; // TODO: REMOVE
+
+        // TODO: Update installed cli
         if (this._isCliInstalled()) {
             return;
         }
@@ -141,21 +152,23 @@ export class CliService {
         const zipFileName = this._zipFileName();
         if (!zipFileName) {return;}
 
-        const downloadUrl = this._getDownloadCliUrl(zipFileName);
+        const downloadUrl = this._getDownloadCliUrl(zipFileName, targetVersion);
 
         const writeData = await this._downloadZippedCli(downloadUrl);
         if (!writeData) {return;}
 
         const fileUri = await this._writeZippedCli(writeData, zipFileName);
         this._unzipCli(fileUri);
+
+        console.log(`Cli version ${targetVersion} installed`);
     }
 
     public startPushingEvents(): void {
         setInterval(() => {
             if (this._isCliInstalled()) {
-                const eventsStr = this._formatEventsBunch();
-                if (eventsStr) {
-                    this._sendEventsBunch(eventsStr);
+                const events = this._formatEventsBunch();
+                if (events) {
+                    this._sendEventsBunch(events);
                 }
             }
           }, EVENT_INTERVAL_MS);

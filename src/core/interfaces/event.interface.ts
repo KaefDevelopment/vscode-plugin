@@ -12,3 +12,8 @@ export interface IEvent {
     params?: Record<string, string>
     timezone: string;
 }
+
+export interface IEventBunch {
+    amount: number;
+    eventsJson: string;
+}

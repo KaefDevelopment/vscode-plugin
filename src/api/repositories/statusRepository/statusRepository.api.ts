@@ -5,7 +5,7 @@ const ENDPOINTS = {
     status: '/user/plugin/status'
 };
 
-export const apiFetchStatus = async (): Promise<IResponse<IStatusResponce | null>> => {
+export const fetchStatus = async (): Promise<IResponse<IStatusResponce | null>> => {
     try {
         const responce = await axiosInstance.post(ENDPOINTS.status, {});
         return {
