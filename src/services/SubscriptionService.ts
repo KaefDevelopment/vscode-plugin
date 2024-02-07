@@ -18,7 +18,7 @@ export class SubscriptionService {
             createdAt: getLocalIsoTime(),
             type: type.toString(),
             project: workspace?.name,
-            projectBaseDir: workspace?.workspaceFolders?.[0].uri.path,
+            projectBaseDir: workspace?.workspaceFolders?.[0].uri.fsPath,
             language: fileFullPath ? path.extname(fileFullPath) : undefined,
             target: fileFullPath,
             branch: '',
