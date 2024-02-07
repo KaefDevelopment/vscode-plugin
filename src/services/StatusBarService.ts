@@ -1,5 +1,5 @@
 import {window, StatusBarItem, StatusBarAlignment} from "vscode";
-import {COMMAND_OPEN_DASHBOARD} from "./CommandService";
+import {COMMAND_STATUS_BAR_CLICK} from "./CommandService";
 import {secondsToHms} from "../core/utils/time.utils";
 
 const BAR_ITEM_ID_KEY = 'nau.time';
@@ -14,7 +14,7 @@ export class StatusBarService {
     public initialize(): void {
 	    this.statusBarItem.name = "Nau";
 	    this.statusBarItem.text = "$(nau-logo) Nau";
-        this.statusBarItem.command = COMMAND_OPEN_DASHBOARD;
+        this.statusBarItem.command = COMMAND_STATUS_BAR_CLICK;
 	    this.statusBarItem.show();
     } 
 

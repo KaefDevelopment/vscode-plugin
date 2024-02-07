@@ -4,6 +4,7 @@ import {CliService} from './services/CliService';
 import {AuthService} from './services/AuthService';
 import {CommandService} from './services/CommandService';
 import {StatusBarService} from './services/StatusBarService';
+import {NotificationService} from './services/NotificationService';
 import {SubscriptionService} from './services/SubscriptionService';
 import {UserStatisticsService} from './services/UserStatisticsService';
 import {LoggerService} from './services/LoggerService';
@@ -29,7 +30,7 @@ export async function activate(context: ExtensionContext) {
 		AuthService.generatePluginIdIfNotExist();
 		AuthService.setAuthHeaders();
 		if (!AuthService.isSignedIn()) {
-			AuthService.showSignInMessage();
+			NotificationService.showSignInMessage();
 		}
 
 		SubscriptionService.start();

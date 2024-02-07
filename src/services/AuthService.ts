@@ -1,7 +1,6 @@
-import {window} from "vscode";
 import {v4 as uuidv4} from 'uuid';
 import {LoggerService} from "./LoggerService";
-import {SIGN_IN_LINK} from "../api/constants/domain.constans";
+import {NotificationService} from "./NotificationService";
 import {updateAxiosHeaders} from "../api/request/request";
 import {safeCtx} from "../extension";
 
@@ -39,15 +38,9 @@ export class AuthService {
     } 
 
     public static setSignInFlag(): void {
-        safeCtx().globalState.update(SIGNIN_FLAG_KEY, '1');
-    } 
-
-    public static showSignInMessage(): void {
-        const pluginId = this.getPluginId();
-        if (!!pluginId) {
-            const signInLink = `[Follow link](${SIGN_IN_LINK(pluginId)})`;
-            window.showInformationMessage(`Welcome to Nau Time Tracker. ${signInLink} to start using the plugin.`);
-            LoggerService.log(`Welcome message is shown for id=${pluginId}.`, 'warn');
+        if (!safeCtx().globalState.get<string>(SIGNIN_FLAG_KEY)) {
+            safeCtx().globalState.update(SIGNIN_FLAG_KEY, '1');
+            NotificationService.showSignInSuccessMessage();
         }
-    }
+    } 
 }

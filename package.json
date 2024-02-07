@@ -17,8 +17,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "nau-time-tracker.open-dashboard",
-        "title": "Open the Nau Time Tracker dashboard"
+        "command": "nau-time-tracker.status-bar-click",
+        "title": "Click on Nau Time Tracker icon"
       }
     ],
     "icons": {
