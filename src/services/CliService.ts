@@ -23,8 +23,8 @@ export class CliService {
 
     constructor() {
         const homeFolder = process.env[this._isWindows() ? 'USERPROFILE' : 'HOME'] || process.cwd();
- 
-        this._cliFolderUri = Uri.joinPath(Uri.parse(homeFolder), CLI_FOLDER);
+
+        this._cliFolderUri = Uri.joinPath(Uri.file(homeFolder), CLI_FOLDER);
         this._cliName = this._isWindows() ? `${CLI_NAME}.exe` : CLI_NAME;
         this._cliFileUri = Uri.joinPath(this._cliFolderUri, this._cliName);
     }
@@ -155,7 +155,7 @@ export class CliService {
         cmds.push("-k", AuthService.getPluginId());
         cmds.push("-s", API_EVENTS_URL);
 
-        childProcess.execFile(this._cliFileUri.fsPath, cmds, {}, (error, stdout, stderr) => {
+        childProcess.execFile(this._cliFileUri.fsPath, cmds, {}, (error, stdout, stderr) => {   
             const success = !error && !!stdout ? JSON.parse(stdout).status : false;
             console.log(`Events ${events.amount} pushed: ${success}.`);
 
