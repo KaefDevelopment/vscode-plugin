@@ -1,11 +1,12 @@
 import {window} from "vscode";
 import {AuthService} from "./AuthService";
 import {LoggerService} from "./LoggerService";
-import {SIGN_IN_LINK} from "../api/constants/domain.constans";
+import {APP_DASHBOARD_URL, SIGN_IN_LINK} from "../api/constants/domain.constans";
 
 export class NotificationService {
     public static showSignInSuccessMessage(): void {
-        window.showInformationMessage(`Congrats! You are linked to Nau Time.`);
+        const browseLink = `[Browse](${APP_DASHBOARD_URL})`;
+        window.showInformationMessage(`Congrats! You are linked to Nau Time. ${browseLink} your stats.`);
         LoggerService.log(`Congrats! You are linked to Nau Time.`);
     }
 
