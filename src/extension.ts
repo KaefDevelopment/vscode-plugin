@@ -14,11 +14,6 @@ export const safeCtx = (): ExtensionContext => {
 	return _ctx!;
 };
 
-/* 
-	Base paths:
-	Cli file: /Users/{user}/.nau
- 	Logger file: - ~/Library/Application Support/Code/User/globalStorage/{plugin}/.nau
- */
 export async function activate(context: ExtensionContext) {
 	_ctx = context;
 
@@ -52,6 +47,7 @@ export async function activate(context: ExtensionContext) {
 		});
 	}
     catch (ex) {
+		console.log("App error: ", ex);
         if (typeof ex === "string") {
 			LoggerService.log(ex);
 		} else if (ex instanceof Error) {
