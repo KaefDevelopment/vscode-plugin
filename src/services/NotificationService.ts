@@ -12,10 +12,10 @@ export class NotificationService {
 
     public static showSignInMessage(): void {
         const pluginId = AuthService.getPluginId();
-        if (!!pluginId) {
-            const signInLink = `[Follow link](${SIGN_IN_LINK(pluginId)})`;
-            window.showInformationMessage(`Welcome to Nau Time Tracker. ${signInLink} to start using the plugin.`);
-            LoggerService.log(`Welcome message is shown for id=${pluginId}.`);
-        }
+        if (!pluginId) {return;}
+
+        const signInLink = `[Follow link](${SIGN_IN_LINK(pluginId)})`;
+        window.showInformationMessage(`Welcome to Nau Time Tracker. ${signInLink} to start using the plugin.`);
+        LoggerService.log(`Welcome message is shown for id=${pluginId}.`);
     }
 }
