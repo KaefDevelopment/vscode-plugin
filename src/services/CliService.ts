@@ -61,7 +61,7 @@ export class CliService {
         return zipUri;
     }
 
-    private _unzipCli(zipUri: Uri): void {
+    private _unzipCli(zipUri: Uri): void {    
         const zip = new AdmZip(zipUri.fsPath);
         zip.extractAllTo(this._cliFolderUri.fsPath, true);
 
@@ -103,9 +103,9 @@ export class CliService {
         };
     }
 
-    public _logCliVersion(): void {
+    public _getCurrentCliVersion(onCallback: (version: string | null) => void): void {
         childProcess.execFile(this._cliFileUri.fsPath, ["version"], {}, (error, stdout, stderr) => {
-            LoggerService.log(`Cli already installed. Current version: ${stdout}.`);
+            onCallback(!error ? stdout.replace(/(\r\n|\n|\r)/gm, "") : null);
         });
     }
 
@@ -127,16 +127,7 @@ export class CliService {
         });
     }
 
-    public async checkAndIntall(): Promise<void> {
-        const latestVersion = await this._getLatestCliVersion();
-        const targetVersion = latestVersion || CLI_STABLE_VERSION;
-
-        // TODO: Update installed cli
-        if (this._isCliInstalled()) {
-            this._logCliVersion();
-            return;
-        }
-
+    public async _install(targetVersion: string): Promise<void> {
         const zipFileName = this._zipFileName();
         if (!zipFileName) {return;}
 
@@ -145,12 +136,38 @@ export class CliService {
         const downloadUrl = this._getDownloadCliUrl(zipFileName, targetVersion);
 
         const writeData = await this._downloadZippedCli(downloadUrl);
-        if (!writeData) {return;}
+        if (!writeData) {
+            LoggerService.log(`Cli ${targetVersion} ${zipFileName} not found.`);
+            return;
+        }
 
         const fileUri = await this._writeZippedCli(writeData, zipFileName);
         this._unzipCli(fileUri);
 
         LoggerService.log(`Cli ${targetVersion} successfully installed.`);
+    }
+
+    public async checkAndIntall(): Promise<void> {
+        const latestVersion = await this._getLatestCliVersion();
+        const targetVersion = latestVersion || CLI_STABLE_VERSION;
+
+        if (!this._isCliInstalled()) {
+            await this._install(targetVersion);
+        } else {
+            this._getCurrentCliVersion((version: string | null) => {
+                LoggerService.log(`Cli versions: target=${latestVersion}, current=${version}.`);
+                if (!version) {return;}
+            
+                const currentVersionNumber = version.replace(/\D/g, "");
+                const targetVersionNumber = targetVersion.replace(/\D/g, "");
+
+                // Upgrade or downgrade cli if it needs
+                if (currentVersionNumber !== targetVersionNumber) {
+                    LoggerService.log(`Cli is updating...`);
+                    this._install(targetVersion);
+                }
+            });
+        }
     }
 
     public startPushingEvents(): void {
