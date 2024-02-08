@@ -1,18 +1,13 @@
 import {workspace, Uri} from "vscode";
 import * as fs from "fs";
-import {safeCtx} from "../extension";
+import {OsService} from "./OsService";
 import {getLocalIsoTime} from "../core/utils/time.utils";
 
-const LOG_FOLDER = ".nau";
-const LOG_FILENAME = "plugin-logger.txt";
+const LOG_FILENAME = "vscode-logger.txt";
 
 export class LoggerService {
-	private static _getLoggerFolderUri(): Uri {
-		return Uri.joinPath(safeCtx().globalStorageUri, LOG_FOLDER);
-	}
-
 	private static _getLoggerFileUri(): Uri {
-		return Uri.joinPath(this._getLoggerFolderUri(), LOG_FILENAME);
+		return Uri.joinPath(OsService.cliFolder, LOG_FILENAME);
 	}
 
 	private static _isLogFileExist(): boolean {

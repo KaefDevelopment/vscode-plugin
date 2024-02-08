@@ -28,7 +28,7 @@ export class AuthService {
 	    updateAxiosHeaders(pluginId, pluginVersion);
 	    
         console.log('Plugin', pluginId, pluginVersion);
-        LoggerService.log(`Plugin info: id=${pluginId}, version=${pluginVersion}.`);
+        LoggerService.log(`Plugin id=${pluginId}, version=${pluginVersion}.`);
     }
     
     public static isSignedIn(): boolean {

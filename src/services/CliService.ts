@@ -1,8 +1,8 @@
 import {Uri, workspace} from "vscode";
-import * as os from "os";
 import * as fs from "fs";
 import * as childProcess from 'child_process';
 import AdmZip from "adm-zip";
+import {OsService} from "./OsService";
 import {AuthService} from "./AuthService";
 import {LoggerService} from "./LoggerService";
 import {groupBy} from "../core/utils/array.utils";
@@ -12,7 +12,6 @@ import {API_EVENTS_URL, CLI_URL} from "../api/constants/domain.constans";
 import {api} from "../api";
 
 const CLI_NAME = "cli";
-const CLI_FOLDER = ".nau";
 const CLI_STABLE_VERSION = 'v1.0.4';
 const EVENT_INTERVAL_MS = 60 * 1000;
 
@@ -22,62 +21,24 @@ export class CliService {
     private _cliFileUri: Uri; 
 
     constructor() {
-        const homeFolder = process.env[this._isWindows() ? 'USERPROFILE' : 'HOME'] || process.cwd();
-
-        this._cliFolderUri = Uri.joinPath(Uri.file(homeFolder), CLI_FOLDER);
-        this._cliName = this._isWindows() ? `${CLI_NAME}.exe` : CLI_NAME;
+        this._cliFolderUri = OsService.cliFolder;
+        this._cliName = OsService.isWindows ? `${CLI_NAME}.exe` : CLI_NAME;
         this._cliFileUri = Uri.joinPath(this._cliFolderUri, this._cliName);
     }
 
-    private _isMacOS(): boolean {
-        return os.platform() === 'darwin';
-    }
-
-    private _isLinux(): boolean {
-        return os.platform() === 'linux';
-    }
-
-    private _isWindows(): boolean {
-        return os.platform() === 'win32';
-    }
-
-    private _osSuffix(): string {
-        if (this._isMacOS()) {return 'darwin';}
-        if (this._isLinux()) {return 'linux';}
-        if (this._isWindows()) {return 'windows';}
-        return '';
-    }
-
-    private _cpuSuffix(): string {
-        const arch = os.arch();
-        if (arch === 'arm64') {return 'arm64';}
-        if (arch === 'x64') {return 'amd64';}
-        if (arch === 'ia32') {return '386';}
-        if (arch === 'arm') {return 'arm-5';}
-        return '';
-    }
-
-    private _zipSuffix(): string {
-        return this._isWindows() ? '.exe.zip' : '.zip';
-    }
-
-    private _fileExtension(): string {
-        return this._isWindows() ? '.exe' : '';
-    }
-
     private _zipFileName(): string | null {
-        const os = this._osSuffix();
-        const cpu = this._cpuSuffix();
-        const zip = this._zipSuffix();
+        const os = OsService.osSuffix;
+        const cpu = OsService.cpuSuffix;
+        const zip = OsService.zipExeSuffix;
 
         if (!os || !cpu) {return null;}
         return `cli-${os}-${cpu}${zip}`;
     }
 
     private _unzippedFileName(): string {
-        const os = this._osSuffix();
-        const cpu = this._cpuSuffix();
-        const extension = this._fileExtension();
+        const os = OsService.osSuffix;
+        const cpu = OsService.cpuSuffix;
+        const extension = OsService.fileExeExtension;
         return `cli-${os}-${cpu}${extension}`;
     }
 
@@ -144,7 +105,7 @@ export class CliService {
 
     public _logCliVersion(): void {
         childProcess.execFile(this._cliFileUri.fsPath, ["version"], {}, (error, stdout, stderr) => {
-            LoggerService.log(`Cli already installed. Current version: ${stdout}`);
+            LoggerService.log(`Cli already installed. Current version: ${stdout}.`);
         });
     }
 
