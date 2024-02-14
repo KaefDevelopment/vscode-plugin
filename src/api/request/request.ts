@@ -5,7 +5,8 @@ const REQUEST_TIMEOUT_MS = 120_000;
 
 const defaultHeaders: Record<string, string> = {
     'Accept': 'application/json',
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'X-Source': 'vscode'
 };
 
 export interface IResponse<T> {

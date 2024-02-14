@@ -1,20 +1,39 @@
 {
   "name": "nautime",
   "displayName": "Nau Time Tracker",
-  "description": "",
+  "description": "Easy automatic time tracker: Improve your work efficiency and gain better insights into your time management. Includes a user-friendly web interface and a mobile app.",
   "version": "1.0.0",
-  "publisher": "Nau Time",
+  "publisher": "nautime",
   "author": {
-    "name": "Nau Time"
+    "name": "Nau"
   },
   "engines": {
     "vscode": "^1.85.0"
   },
   "categories": [
-    "Visualization",
-    "Education"
+    "Education",
+    "Visualization"
   ],
-  "keywords": [],
+  "keywords": [
+    "nau",
+    "nau time",
+    "time",
+    "tracking",
+    "tracker",
+    "time tracker",
+    "time tracking",
+    "work",
+    "worktime",
+    "code",
+    "code time",
+    "codetime",
+    "analytics",
+    "task",
+    "focus",
+    "metrics",
+    "productivity",
+    "perfomance"
+  ],
   "activationEvents": [
     "onStartupFinished"
   ],
@@ -29,6 +48,7 @@
   },
   "license": "BSD-3-Clause",
   "main": "./dist/extension.js",
+  "icon": "images/nau-logo.png",
   "contributes": {
     "commands": [
       {
@@ -76,6 +96,7 @@
   "dependencies": {
     "adm-zip": "^0.5.10",
     "axios": "^1.6.6",
+    "original-fs": "^1.2.0",
     "os": "^0.1.2",
     "uuid": "^9.0.1"
   }
