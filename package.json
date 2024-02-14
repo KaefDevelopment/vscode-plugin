@@ -1,8 +1,12 @@
 {
-  "name": "nau-time-tracker",
+  "name": "nautime",
   "displayName": "Nau Time Tracker",
   "description": "",
   "version": "1.0.0",
+  "publisher": "Nau Time",
+  "author": {
+    "name": "Nau Time"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -10,9 +14,20 @@
     "Visualization",
     "Education"
   ],
+  "keywords": [],
   "activationEvents": [
     "onStartupFinished"
   ],
+  "homepage": "https://nautime.io/",
+  "bugs": {
+    "url": "https://github.com/KaefDevelopment/vscode-plugin/issues",
+    "email": "support@nautime.io"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KaefDevelopment/vscode-plugin.git"
+  },
+  "license": "BSD-3-Clause",
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
@@ -25,7 +40,7 @@
       "nau-logo": {
         "description": "Nau icon",
         "default": {
-          "fontPath": "./src/shared/icons/icons.woff",
+          "fontPath": "./icons.woff",
           "fontCharacter": "\\E900"
         }
       }
