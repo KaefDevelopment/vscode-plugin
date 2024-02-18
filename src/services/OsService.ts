@@ -44,6 +44,10 @@ export class OsService {
         return process.env[this.isWindows ? 'USERPROFILE' : 'HOME'] || process.cwd();
     }
 
+    public static get hostname(): string {
+        return os.hostname();
+    }
+
     public static get cliFolder(): Uri {
         return Uri.joinPath(Uri.file(this.homeFolderFsPath), CLI_FOLDER);
     }

@@ -1,18 +1,17 @@
-import {window, workspace} from "vscode";
+import {window, workspace, version} from "vscode";
 import {v4 as uuidv4} from 'uuid';
 import path from 'path';
+import {OsService} from "./OsService";
+import {AuthService} from "./AuthService";
 import {safeCtx} from "../extension";
 import {EEventType} from "../core/enums/event.enum";
 import {getLocalIsoTime} from "../core/utils/time.utils";
 import {IEvent} from "../core/interfaces/event.interface";
 
-const UNIQUE_ID_KEY = 'UNIQUE_ID';
-const SIGNIN_FLAG_KEY = 'SIGNIN_FLAG';
-
 export class SubscriptionService {
     private static _eventsQueue: IEvent[] = [];
 
-    private static _pushEventToQueue(type: EEventType, fileFullPath: string): void {
+    private static _pushEventToQueue(type: EEventType, fileFullPath: string, params?: Record<string, string | number>): void {
         this._eventsQueue.push({
             id: uuidv4(),
             createdAt: getLocalIsoTime(),
@@ -22,8 +21,18 @@ export class SubscriptionService {
             language: fileFullPath ? path.extname(fileFullPath) : undefined,
             target: fileFullPath,
             branch: '',
-            params: {},
+            params: !!params ? params : {},
             timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+        });
+    }
+
+    public static _pushPluginInfoEvent(): void {
+        this._pushEventToQueue(EEventType.PLUGIN_INFO, '', {
+            pluginVersion: AuthService.getPluginVersion(),
+            osName: OsService.osSuffix,
+            deviceName: OsService.hostname,
+            ideType: 'VSCode',
+            ideVersion: version
         });
     }
 
@@ -32,6 +41,8 @@ export class SubscriptionService {
     };
     
     public static start(): void {
+        this._pushPluginInfoEvent();
+
 	    safeCtx().subscriptions.push(window.onDidChangeActiveTextEditor((editor) => {
             if (!!editor?.document.fileName) {
                 this._pushEventToQueue(EEventType.DOCUMENT_OPEN, editor?.document.fileName);
