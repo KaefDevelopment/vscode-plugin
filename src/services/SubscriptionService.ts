@@ -31,7 +31,7 @@ export class SubscriptionService {
             pluginVersion: AuthService.getPluginVersion(),
             osName: OsService.osSuffix,
             deviceName: OsService.hostname,
-            ideType: 'VSCode',
+            ideType: 'vscode',
             ideVersion: version
         });
     }

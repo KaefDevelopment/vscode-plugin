@@ -17,10 +17,10 @@ export class OsService {
     }
 
     public static get osSuffix(): string {
-        if (this.isMacOS) {return 'darwin';}
-        if (this.isLinux) {return 'linux';}
-        if (this.isWindows) {return 'windows';}
-        return '';
+        if (this.isMacOS) {return 'MAC';}
+        if (this.isLinux) {return 'LINUX';}
+        if (this.isWindows) {return 'WIN';}
+        return 'OTHER';
     }
 
     public static get cpuSuffix(): string {
