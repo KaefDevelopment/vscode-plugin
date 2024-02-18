@@ -2,7 +2,7 @@
   "name": "nautime",
   "displayName": "Nau Time Tracker",
   "description": "Easy automatic time tracker: Increases efficiency, helps you with time management",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "publisher": "nautime",
   "author": {
     "name": "Nau"
@@ -65,6 +65,10 @@
         }
       }
     }
+  },
+  "galleryBanner": {
+    "theme": "dark",
+    "color": "#0A0A0A"
   },
   "scripts": {
     "vscode:prepublish": "npm run package",

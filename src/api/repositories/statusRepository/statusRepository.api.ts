@@ -2,7 +2,7 @@ import {IStatusResponce} from "./statusRepository.api.types";
 import {IResponse, axiosInstance} from "../../request/request";
 
 const ENDPOINTS = {
-    status: '/user/plugin/status'
+    status: '/user/plugin/status2'
 };
 
 export const fetchStatus = async (): Promise<IResponse<IStatusResponce | null>> => {
