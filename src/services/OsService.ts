@@ -17,6 +17,13 @@ export class OsService {
     }
 
     public static get osSuffix(): string {
+        if (this.isMacOS) {return 'darwin';}
+        if (this.isLinux) {return 'linux';}
+        if (this.isWindows) {return 'windows';}
+        return 'other';
+    }
+
+    public static get osSuffixFriendly(): string {
         if (this.isMacOS) {return 'MAC';}
         if (this.isLinux) {return 'LINUX';}
         if (this.isWindows) {return 'WIN';}

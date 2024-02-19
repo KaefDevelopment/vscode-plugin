@@ -29,7 +29,7 @@ export class SubscriptionService {
     public static _pushPluginInfoEvent(): void {
         this._pushEventToQueue(EEventType.PLUGIN_INFO, '', {
             pluginVersion: AuthService.getPluginVersion(),
-            osName: OsService.osSuffix,
+            osName: OsService.osSuffixFriendly,
             deviceName: OsService.hostname,
             ideType: 'vscode',
             ideVersion: version
