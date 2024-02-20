@@ -1,6 +1,6 @@
 import {api} from "../api";
 
-const STATS_INTERVAL_MS = 10 * 1000;
+const STATS_INTERVAL_MS = 50 * 1000;
 
 export class UserStatisticsService {
     private static _fetchStatistics(onCallback: (seconds: number) => void): void {
