@@ -8,6 +8,9 @@
 Please follow the link in the notification. If you don't see the notification, click on the Nau icon in the status bar in the bottom right corner of the screen
 ![Install](https://nautime-static.s3.us-east-1.amazonaws.com/vscode-install.png)
 
+Keep track of your working time
+![Stat](https://nautime-static.s3.amazonaws.com/vscode-stats.png)
+
 Enjoy your coding stats: https://nautime.io
 
 
