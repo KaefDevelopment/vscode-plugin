@@ -32,6 +32,7 @@ export class SubscriptionService {
             osName: OsService.osSuffixFriendly,
             deviceName: OsService.hostname,
             ideType: 'vscode',
+            pluginType: 'vscode',
             ideVersion: version
         });
     }
