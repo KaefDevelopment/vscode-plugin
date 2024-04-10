@@ -12,7 +12,7 @@ import {API_EVENTS_URL, CLI_URL} from "../api/constants/domain.constans";
 import {api} from "../api";
 
 const CLI_NAME = "cli";
-const CLI_STABLE_VERSION = 'v1.0.4';
+const CLI_STABLE_VERSION = 'v1.0.6';
 const EVENT_INTERVAL_MS = 60 * 1000;
 
 export class CliService {
