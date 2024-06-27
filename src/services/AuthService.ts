@@ -16,9 +16,10 @@ export class AuthService {
         return safeCtx().extension.packageJSON.version;
     }
 
-    public static generatePluginIdIfNotExist(): void {
+    public static async generatePluginIdIfNotExist(): Promise<void> {
         if (!safeCtx().globalState.get<string>(PLUGIN_ID_KEY)) {
-            safeCtx().globalState.update(PLUGIN_ID_KEY, uuidv4());
+            await safeCtx().globalState.update(PLUGIN_ID_KEY, uuidv4());
+            await safeCtx().globalState.update(SIGNIN_FLAG_KEY, undefined);
         }
     }
 

@@ -27,7 +27,7 @@ export async function activate(context: ExtensionContext) {
 
 	try 
 	{
-		AuthService.generatePluginIdIfNotExist();
+		await AuthService.generatePluginIdIfNotExist();
 		AuthService.setAuthHeaders();
 		if (!AuthService.isSignedIn()) {
 			NotificationService.showSignInMessage();
