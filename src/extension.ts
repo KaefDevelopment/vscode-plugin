@@ -8,6 +8,7 @@ import {NotificationService} from './services/NotificationService';
 import {SubscriptionService} from './services/SubscriptionService';
 import {UserStatisticsService} from './services/UserStatisticsService';
 import {LoggerService} from './services/LoggerService';
+import {IStatusResponse} from './api';
 
 let _ctx: ExtensionContext | undefined;
 
@@ -42,9 +43,9 @@ export async function activate(context: ExtensionContext) {
 		const statusBarService = new StatusBarService();
 		statusBarService.initialize();
 
-		UserStatisticsService.startFetching((seconds: number) => {
+		UserStatisticsService.startFetching((statusResponse: IStatusResponse) => {
 			AuthService.setSignInFlag();
-			statusBarService.update.bind(statusBarService)(seconds);
+			statusBarService.update.bind(statusBarService)(statusResponse);
 		});
 	}
     catch (ex) {
